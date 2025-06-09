@@ -6,9 +6,24 @@ html, body {
   color: #fff;
 }
 
-#timeline {
+
+#timeline-container {
+  position: relative;
   height: 35vh;
   border-bottom: 2px solid #fff;
+}
+
+#timeline {
+  height: 100%;
+}
+
+#indicator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: red;
+  pointer-events: none;
 }
 
 #map {
