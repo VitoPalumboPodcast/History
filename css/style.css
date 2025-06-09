@@ -17,5 +17,17 @@ html, body {
 
 .vis-item {
   color: #000;
-  background-color: #ff0;
+}
+
+.vis-item.category-war {
+  background-color: #f55;
+}
+
+.vis-item.category-empire {
+  background-color: #5f5;
+}
+
+.vis-item.category-migration {
+  background-color: #55f;
+  color: #fff;
 }

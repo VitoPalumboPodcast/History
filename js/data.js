@@ -5,7 +5,9 @@ const events = [
     start: '2024-01-01',
     end: '2024-01-02',
     latlng: [41.9, 12.5],
-    popup: 'Rome Event'
+    popup: 'Rome Event',
+    category: 'empire',
+    region: 'italy'
   },
   {
     id: 2,
@@ -13,7 +15,9 @@ const events = [
     start: '2024-02-01',
     end: '2024-02-02',
     latlng: [48.8, 2.3],
-    popup: 'Paris Event'
+    popup: 'Paris Event',
+    category: 'war',
+    region: 'france'
   },
   {
     id: 3,
@@ -21,6 +25,8 @@ const events = [
     start: '2024-03-01',
     end: '2024-03-02',
     latlng: [51.5, -0.1],
-    popup: 'London Event'
+    popup: 'London Event',
+    category: 'migration',
+    region: 'uk'
   }
 ];
