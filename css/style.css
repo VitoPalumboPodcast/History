@@ -1,0 +1,21 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #000;
+  color: #fff;
+}
+
+#timeline {
+  height: 35vh;
+  border-bottom: 2px solid #fff;
+}
+
+#map {
+  height: 65vh;
+}
+
+.vis-item {
+  color: #000;
+  background-color: #ff0;
+}
