@@ -1,3 +1,13 @@
+// Utility to create Date objects supporting negative years (e.g. "-0500-01-01")
+function parseDate(str) {
+  if (!str) return null;
+  const parts = str.split('-').map(Number);
+  const year = parts[0];
+  const month = parts[1] - 1 || 0;
+  const day = parts[2] || 1;
+  return new Date(year, month, day);
+}
+
 // Initialize map
 const map = L.map('map').setView([41.9, 12.5], 5);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -16,9 +26,19 @@ for (const evt of events) {
 
 // Initialize timeline
 const container = document.getElementById('timeline');
-const items = new vis.DataSet(events);
+const items = new vis.DataSet(
+  events.map(evt => ({
+    ...evt,
+    start: parseDate(evt.start),
+    end: evt.end ? parseDate(evt.end) : undefined
+  }))
+);
 const options = {
-  height: '100%'
+  height: '100%',
+  zoomMin: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
+  zoomMax: 1000 * 60 * 60 * 24 * 365 * 3000, // several millennia
+  start: parseDate('-0600-01-01'),
+  end: parseDate('2050-01-01')
 };
 const timeline = new vis.Timeline(container, items, options);
 
