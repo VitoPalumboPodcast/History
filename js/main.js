@@ -14,6 +14,13 @@ for (const evt of events) {
   });
 }
 
+// Prepare empire layers
+const empireLayers = {};
+for (const emp of empires) {
+  const layer = L.polygon(emp.coordinates, emp.style).bindPopup(emp.name);
+  empireLayers[emp.name] = layer;
+}
+
 // Initialize timeline
 const container = document.getElementById('timeline');
 const items = new vis.DataSet(events);
@@ -30,3 +37,25 @@ timeline.on('select', props => {
     marker.openPopup();
   }
 });
+
+function updateEmpires() {
+  const range = timeline.getWindow();
+  const start = range.start;
+  const end = range.end;
+  for (const emp of empires) {
+    const empStart = new Date(emp.start);
+    const empEnd = new Date(emp.end);
+    const layer = empireLayers[emp.name];
+    const visible = empEnd >= start && empStart <= end;
+    if (visible) {
+      if (!map.hasLayer(layer)) {
+        layer.addTo(map);
+      }
+    } else if (map.hasLayer(layer)) {
+      map.removeLayer(layer);
+    }
+  }
+}
+
+timeline.on('rangechanged', updateEmpires);
+updateEmpires();
