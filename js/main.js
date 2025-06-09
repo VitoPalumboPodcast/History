@@ -15,12 +15,40 @@ for (const evt of events) {
 }
 
 // Initialize timeline
-const container = document.getElementById('timeline');
+const timelineEl = document.getElementById('timeline');
+const timelineContainer = document.getElementById('timeline-container');
+const indicator = document.getElementById('indicator');
+
 const items = new vis.DataSet(events);
 const options = {
   height: '100%'
 };
-const timeline = new vis.Timeline(container, items, options);
+const timeline = new vis.Timeline(timelineEl, items, options);
+
+// calculate global time range
+let minTime = Infinity;
+let maxTime = -Infinity;
+for (const evt of events) {
+  const start = new Date(evt.start).getTime();
+  const end = new Date(evt.end).getTime();
+  if (start < minTime) minTime = start;
+  if (end < minTime) minTime = end;
+  if (start > maxTime) maxTime = start;
+  if (end > maxTime) maxTime = end;
+}
+minTime = new Date(minTime);
+maxTime = new Date(maxTime);
+
+function updateIndicator() {
+  const windowRange = timeline.getWindow();
+  const center = new Date((windowRange.start.getTime() + windowRange.end.getTime()) / 2);
+  const progress = (center - minTime) / (maxTime - minTime);
+  const width = timelineContainer.clientWidth;
+  indicator.style.left = (progress * width) + 'px';
+}
+
+timeline.on('rangechanged', updateIndicator);
+updateIndicator();
 
 timeline.on('select', props => {
   const id = props.items[0];
