@@ -51,6 +51,11 @@ const options = {
 };
 const timeline = new vis.Timeline(timelineEl, items, options);
 
+function getCenterDate() {
+  const range = timeline.getWindow();
+  return new Date((range.start.getTime() + range.end.getTime()) / 2);
+}
+
 // calculate global time range
 let minTime = Infinity;
 let maxTime = -Infinity;
@@ -66,8 +71,7 @@ minTime = new Date(minTime);
 maxTime = new Date(maxTime);
 
 function updateIndicator() {
-  const windowRange = timeline.getWindow();
-  const center = new Date((windowRange.start.getTime() + windowRange.end.getTime()) / 2);
+  const center = getCenterDate();
   yearLabel.textContent = center.getFullYear();
 }
 
@@ -84,9 +88,7 @@ timeline.on('select', props => {
 });
 
 function updateEmpires() {
-  const range = timeline.getWindow();
-  const start = range.start;
-  const end = range.end;
+  const center = getCenterDate();
 
   for (const emp of empires) {
     const info = empireLayers[emp.name];
@@ -96,7 +98,7 @@ function updateEmpires() {
     for (const s of emp.segments) {
       const segStart = new Date(s.start);
       const segEnd = new Date(s.end);
-      if (segEnd >= start && segStart <= end) {
+      if (segStart <= center && segEnd >= center) {
         seg = s;
         break;
       }
@@ -118,16 +120,14 @@ function updateEmpires() {
 }
 
 function updateObjects() {
-  const range = timeline.getWindow();
-  const start = range.start;
-  const end = range.end;
+  const center = getCenterDate();
 
   for (const item of objectLayers) {
     const obj = item.obj;
     const layer = item.layer;
     const objStart = new Date(obj.start);
     const objEnd = new Date(obj.end);
-    if (objEnd >= start && objStart <= end) {
+    if (objStart <= center && objEnd >= center) {
       if (!map.hasLayer(layer)) {
         layer.addTo(map);
       }
