@@ -17,8 +17,9 @@ for (const evt of events) {
 // Prepare empire layers
 const empireLayers = {};
 for (const emp of empires) {
-  const layer = L.polygon(emp.coordinates, emp.style).bindPopup(emp.name);
-  empireLayers[emp.name] = layer;
+  const firstSeg = emp.segments[0];
+  const layer = L.polygon(firstSeg.coordinates, emp.style).bindPopup(emp.name);
+  empireLayers[emp.name] = { layer, currentSegment: null };
 }
 
 // Initialize timeline
@@ -70,17 +71,32 @@ function updateEmpires() {
   const range = timeline.getWindow();
   const start = range.start;
   const end = range.end;
+
   for (const emp of empires) {
-    const empStart = new Date(emp.start);
-    const empEnd = new Date(emp.end);
-    const layer = empireLayers[emp.name];
-    const visible = empEnd >= start && empStart <= end;
-    if (visible) {
+    const info = empireLayers[emp.name];
+    const layer = info.layer;
+
+    let seg = null;
+    for (const s of emp.segments) {
+      const segStart = new Date(s.start);
+      const segEnd = new Date(s.end);
+      if (segEnd >= start && segStart <= end) {
+        seg = s;
+        break;
+      }
+    }
+
+    if (seg) {
+      if (info.currentSegment !== seg) {
+        layer.setLatLngs(seg.coordinates);
+        info.currentSegment = seg;
+      }
       if (!map.hasLayer(layer)) {
         layer.addTo(map);
       }
     } else if (map.hasLayer(layer)) {
       map.removeLayer(layer);
+      info.currentSegment = null;
     }
   }
 }
