@@ -39,18 +39,6 @@ for (const obj of objects) {
   objectLayers.push({ obj, layer });
 }
 
-// Initialize timeline
-const timelineEl = document.getElementById('timeline');
-const timelineContainer = document.getElementById('timeline-container');
-const indicator = document.getElementById('indicator');
-const yearLabel = document.getElementById('year-label');
-
-const items = new vis.DataSet(events);
-const options = {
-  height: '100%'
-};
-const timeline = new vis.Timeline(timelineEl, items, options);
-
 // calculate global time range
 let minTime = Infinity;
 let maxTime = -Infinity;
@@ -64,6 +52,20 @@ for (const evt of events) {
 }
 minTime = new Date(minTime);
 maxTime = new Date(maxTime);
+
+// Initialize timeline
+const timelineEl = document.getElementById('timeline');
+const timelineContainer = document.getElementById('timeline-container');
+const indicator = document.getElementById('indicator');
+const yearLabel = document.getElementById('year-label');
+
+const items = new vis.DataSet(events);
+const options = {
+  height: '100%',
+  min: minTime,
+  max: maxTime
+};
+const timeline = new vis.Timeline(timelineEl, items, options);
 
 function updateIndicator() {
   const windowRange = timeline.getWindow();
