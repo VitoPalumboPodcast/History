@@ -22,6 +22,23 @@ for (const emp of empires) {
   empireLayers[emp.name] = { layer, currentSegment: null };
 }
 
+// Prepare additional object layers
+const objectLayers = [];
+for (const obj of objects) {
+  let layer;
+  if (obj.type === 'marker') {
+    layer = L.marker(obj.latlng, obj.style);
+  } else if (obj.type === 'polyline') {
+    layer = L.polyline(obj.coordinates, obj.style);
+  } else if (obj.type === 'polygon') {
+    layer = L.polygon(obj.coordinates, obj.style);
+  }
+  if (obj.popup) {
+    layer.bindPopup(obj.popup);
+  }
+  objectLayers.push({ obj, layer });
+}
+
 // Initialize timeline
 const timelineEl = document.getElementById('timeline');
 const timelineContainer = document.getElementById('timeline-container');
@@ -100,5 +117,27 @@ function updateEmpires() {
   }
 }
 
+function updateObjects() {
+  const range = timeline.getWindow();
+  const start = range.start;
+  const end = range.end;
+
+  for (const item of objectLayers) {
+    const obj = item.obj;
+    const layer = item.layer;
+    const objStart = new Date(obj.start);
+    const objEnd = new Date(obj.end);
+    if (objEnd >= start && objStart <= end) {
+      if (!map.hasLayer(layer)) {
+        layer.addTo(map);
+      }
+    } else if (map.hasLayer(layer)) {
+      map.removeLayer(layer);
+    }
+  }
+}
+
 timeline.on('rangechanged', updateEmpires);
+timeline.on('rangechanged', updateObjects);
 updateEmpires();
+updateObjects();
