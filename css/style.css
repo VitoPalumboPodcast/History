@@ -31,12 +31,12 @@ html, body {
 #indicator::after {
   content: '';
   position: absolute;
-  top: -6px;
+  bottom: -6px;
   left: 50%;
   transform: translateX(-50%);
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-bottom: 6px solid red;
+  border-top: 6px solid red;
 }
 
 #year-label {
