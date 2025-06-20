@@ -27,7 +27,7 @@ const objectLayers = [];
 for (const obj of objects) {
   let layer;
   if (obj.type === 'marker') {
-    layer = L.marker(obj.latlng, obj.style);
+    layer = L.marker(obj.latlng, obj.style || {}); // Pass empty object if style is undefined
   } else if (obj.type === 'polyline') {
     layer = L.polyline(obj.coordinates, obj.style);
   } else if (obj.type === 'polygon') {
@@ -40,18 +40,53 @@ for (const obj of objects) {
 }
 
 // calculate global time range
-let minTime = Infinity;
-let maxTime = -Infinity;
-for (const evt of events) {
-  const start = new Date(evt.start).getTime();
-  const end = new Date(evt.end).getTime();
-  if (start < minTime) minTime = start;
-  if (end < minTime) minTime = end;
-  if (start > maxTime) maxTime = start;
-  if (end > maxTime) maxTime = end;
+let minTimelineEdge = new Date('9999-12-31').getTime();
+let maxTimelineEdge = new Date('0000-01-01').getTime();
+
+function updateOverallTimeRange(startTimeStr, endTimeStr) {
+  if (startTimeStr) {
+    const startTime = new Date(startTimeStr).getTime();
+    if (startTime < minTimelineEdge) {
+      minTimelineEdge = startTime;
+    }
+  }
+  if (endTimeStr) {
+    const endTime = new Date(endTimeStr).getTime();
+    if (endTime > maxTimelineEdge) {
+      maxTimelineEdge = endTime;
+    }
+  }
 }
-minTime = new Date(minTime);
-maxTime = new Date(maxTime);
+
+for (const evt of events) {
+  updateOverallTimeRange(evt.start, evt.end);
+}
+
+for (const emp of empires) {
+  for (const seg of emp.segments) {
+    updateOverallTimeRange(seg.start, seg.end);
+  }
+}
+
+for (const obj of objects) {
+  updateOverallTimeRange(obj.start, obj.end);
+}
+
+// Handle case where no dates were found (e.g., all data arrays empty)
+if (minTimelineEdge === new Date('9999-12-31').getTime() || maxTimelineEdge === new Date('0000-01-01').getTime()) {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    minTimelineEdge = new Date(currentYear, 0, 1).getTime(); // Jan 1st of current year
+    maxTimelineEdge = new Date(currentYear, 11, 31).getTime(); // Dec 31st of current year
+    // If still default (e.g. current year is 9999 or 0000), set a more reasonable default
+    if (minTimelineEdge > maxTimelineEdge) {
+        minTimelineEdge = new Date(2000, 0, 1).getTime();
+        maxTimelineEdge = new Date(2000, 11, 31).getTime();
+    }
+}
+
+const timelineMin = new Date(minTimelineEdge);
+const timelineMax = new Date(maxTimelineEdge);
 
 // Initialize timeline
 const timelineEl = document.getElementById('timeline');
@@ -62,9 +97,20 @@ const yearLabel = document.getElementById('year-label');
 const items = new vis.DataSet(events);
 const options = {
   height: '100%',
-  min: minTime,
-  max: maxTime
+  min: timelineMin,
+  max: timelineMax,
+  // Ensure the initial window shows some data if possible
+  // If min and max are the same, vis.js might error or behave unexpectedly.
+  // Add a small buffer if they are identical.
+  start: timelineMin,
+  end: new Date(Math.max(timelineMin.getTime() + (24*60*60*1000), timelineMax.getTime())) // At least one day window or full range
 };
+// If timelineMin and timelineMax are too close, Vis.js might have issues.
+// It's good practice to ensure there's a reasonable default span.
+if (options.end.getTime() === options.start.getTime()) {
+    options.end = new Date(options.start.getTime() + 30 * 24 * 60 * 60 * 1000); // Add 30 days if start and end are identical
+}
+
 const timeline = new vis.Timeline(timelineEl, items, options);
 
 function updateIndicator() {
@@ -74,6 +120,13 @@ function updateIndicator() {
 }
 
 timeline.on('rangechanged', updateIndicator);
+// Call updateIndicator after timeline is fully initialized and has a window
+timeline.on('changed', () => {
+    updateIndicator();
+    updateEmpires();
+    updateObjects();
+});
+// Initial calls are still good for first load before 'changed' might fire or to ensure state.
 updateIndicator();
 
 timeline.on('select', props => {
@@ -139,7 +192,21 @@ function updateObjects() {
   }
 }
 
-timeline.on('rangechanged', updateEmpires);
-timeline.on('rangechanged', updateObjects);
-updateEmpires();
-updateObjects();
+// Removed duplicate rangechanged listeners
+// 'changed' event listener above now handles these updates.
+
+// Initial state update
+// updateEmpires(); // Called by 'changed' event now
+// updateObjects(); // Called by 'changed' event now
+
+// Force a redraw/recheck after timeline is initialized to set initial state
+timeline.redraw();
+// Alternatively, directly call after a short delay or ensure options.start/end are valid for initial window
+// For safety, explicit initial calls if 'changed' is not guaranteed on first load with all data.
+// The `timeline.on('changed', ...)` should cover the initial setup as well.
+// If not, these can be reinstated:
+Promise.resolve().then(() => {
+    updateIndicator();
+    updateEmpires();
+    updateObjects();
+});
