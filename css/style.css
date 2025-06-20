@@ -21,8 +21,33 @@ html, body {
   position: absolute;
   top: 0;
   bottom: 0;
+  left: 50%;
   width: 2px;
+  margin-left: -1px;
   background: red;
+  pointer-events: none;
+}
+
+#indicator::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid red;
+}
+
+#year-label {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  padding: 2px 6px;
+  font-size: 14px;
   pointer-events: none;
 }
 

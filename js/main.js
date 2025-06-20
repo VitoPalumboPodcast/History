@@ -26,6 +26,7 @@ for (const emp of empires) {
 const timelineEl = document.getElementById('timeline');
 const timelineContainer = document.getElementById('timeline-container');
 const indicator = document.getElementById('indicator');
+const yearLabel = document.getElementById('year-label');
 
 const items = new vis.DataSet(events);
 const options = {
@@ -50,9 +51,7 @@ maxTime = new Date(maxTime);
 function updateIndicator() {
   const windowRange = timeline.getWindow();
   const center = new Date((windowRange.start.getTime() + windowRange.end.getTime()) / 2);
-  const progress = (center - minTime) / (maxTime - minTime);
-  const width = timelineContainer.clientWidth;
-  indicator.style.left = (progress * width) + 'px';
+  yearLabel.textContent = center.getFullYear();
 }
 
 timeline.on('rangechanged', updateIndicator);
