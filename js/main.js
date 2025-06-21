@@ -1,5 +1,5 @@
-// Initialize map
-const map = L.map('map').setView([41.9, 12.5], 5);
+// Initialize map with a wider view
+const map = L.map('map').setView([45, 5], 4);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap contributors'
 }).addTo(map);
@@ -46,13 +46,13 @@ let maxTimelineEdge = new Date('0000-01-01').getTime();
 function updateOverallTimeRange(startTimeStr, endTimeStr) {
   if (startTimeStr) {
     const startTime = new Date(startTimeStr).getTime();
-    if (startTime < minTimelineEdge) {
+    if (!isNaN(startTime) && startTime < minTimelineEdge) {
       minTimelineEdge = startTime;
     }
   }
   if (endTimeStr) {
     const endTime = new Date(endTimeStr).getTime();
-    if (endTime > maxTimelineEdge) {
+    if (!isNaN(endTime) && endTime > maxTimelineEdge) {
       maxTimelineEdge = endTime;
     }
   }
@@ -99,16 +99,13 @@ const options = {
   height: '100%',
   min: timelineMin,
   max: timelineMax,
-  // Ensure the initial window shows some data if possible
-  // If min and max are the same, vis.js might error or behave unexpectedly.
-  // Add a small buffer if they are identical.
   start: timelineMin,
-  end: new Date(Math.max(timelineMin.getTime() + (24*60*60*1000), timelineMax.getTime())) // At least one day window or full range
+  end: new Date(Math.max(timelineMin.getTime() + (30 * 24 * 60 * 60 * 1000), timelineMax.getTime())),
+  zoomMin: 1000 * 60 * 60 * 24 * 7,
+  zoomMax: (timelineMax.getTime() - timelineMin.getTime()) * 2
 };
-// If timelineMin and timelineMax are too close, Vis.js might have issues.
-// It's good practice to ensure there's a reasonable default span.
-if (options.end.getTime() === options.start.getTime()) {
-    options.end = new Date(options.start.getTime() + 30 * 24 * 60 * 60 * 1000); // Add 30 days if start and end are identical
+if (options.end.getTime() <= options.start.getTime()) {
+  options.end = new Date(options.start.getTime() + 30 * 24 * 60 * 60 * 1000);
 }
 
 const timeline = new vis.Timeline(timelineEl, items, options);
@@ -192,21 +189,21 @@ function updateObjects() {
   }
 }
 
-// Removed duplicate rangechanged listeners
-// 'changed' event listener above now handles these updates.
-
-// Initial state update
-// updateEmpires(); // Called by 'changed' event now
-// updateObjects(); // Called by 'changed' event now
-
-// Force a redraw/recheck after timeline is initialized to set initial state
-timeline.redraw();
-// Alternatively, directly call after a short delay or ensure options.start/end are valid for initial window
-// For safety, explicit initial calls if 'changed' is not guaranteed on first load with all data.
-// The `timeline.on('changed', ...)` should cover the initial setup as well.
-// If not, these can be reinstated:
-Promise.resolve().then(() => {
-    updateIndicator();
-    updateEmpires();
-    updateObjects();
-});
+// Initial updates after timeline and map are ready
+setTimeout(() => {
+  updateIndicator();
+  updateEmpires();
+  updateObjects();
+  if (items.getIds().length > 0) {
+    timeline.fit();
+    const firstEvent = events.find(e => e.id === items.getIds()[0]);
+    if (firstEvent && firstEvent.latlng) {
+      map.setView(firstEvent.latlng, 5);
+    }
+  } else {
+    timeline.setWindow(timelineMin, timelineMax);
+  }
+  updateIndicator();
+  updateEmpires();
+  updateObjects();
+}, 100);
