@@ -96,5 +96,23 @@ const empires = [
       }
     ],
     style: { color: '#ffff00', weight: 2, fillColor: '#ffff00', fillOpacity: 0.2 }
+  },
+  {
+    name: 'Classical Empire',
+    segments: [
+      {
+        start: '2022-01-01',
+        end: '2022-12-31',
+        coordinates: [
+          [
+            [20, 20],
+            [20, 30],
+            [10, 30],
+            [10, 20]
+          ]
+        ]
+      }
+    ],
+    style: { color: '#00ffff', weight: 2, fillColor: '#00ffff', fillOpacity: 0.2 }
   }
 ];

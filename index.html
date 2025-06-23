@@ -143,8 +143,16 @@
         end: '2024-04-30',
         latlng: [40.7128, -74.0060], // New York
         popup: 'Long Event spanning multiple months'
+      },
+      {
+        id: 5,
+        content: 'Ancient Festival (Athens)',
+        start: '2022-06-01',
+        end: '2022-06-02',
+        latlng: [37.98, 23.72],
+        popup: 'Athens Festival (Jun 1-2, 2022)'
       }
-    ];
+      ];
     // --- END OF data.js ---
   </script>
 
@@ -245,8 +253,23 @@
             }
         ],
         style: { color: '#ffff00', weight: 2, fillColor: '#ffff00', fillOpacity: 0.2 }
+      },
+      {
+        name: 'Classical Empire',
+        segments: [
+          {
+            start: '2022-01-01',
+            end: '2022-12-31',
+            coordinates: [
+              [
+                [20, 20], [20, 30], [10, 30], [10, 20]
+              ]
+            ]
+          }
+        ],
+        style: { color: '#00ffff', weight: 2, fillColor: '#00ffff', fillOpacity: 0.2 }
       }
-    ];
+      ];
     // --- END OF empires.js ---
   </script>
 
@@ -294,8 +317,15 @@
         type: 'marker',
         latlng: [32.5, 35], // In the "Ancient Empire" area
         popup: 'Ancient Site (Mar-May 2023)'
+      },
+      {
+        start: '2022-04-01',
+        end: '2022-04-15',
+        type: 'marker',
+        latlng: [25, 25],
+        popup: 'Classical Ruins (Apr 1-15, 2022)'
       }
-    ];
+      ];
     // --- END OF objects.js ---
   </script>
 

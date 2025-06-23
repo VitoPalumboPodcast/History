@@ -30,5 +30,13 @@ const events = [
     end: '2024-04-30',
     latlng: [40.7128, -74.0060],
     popup: 'Long Event spanning multiple months'
+  },
+  {
+    id: 5,
+    content: 'Ancient Festival (Athens)',
+    start: '2022-06-01',
+    end: '2022-06-02',
+    latlng: [37.98, 23.72],
+    popup: 'Athens Festival (Jun 1-2, 2022)'
   }
 ];
