@@ -2,6 +2,10 @@
 
 This project displays historical empires on a map with a timeline indicator.
 
+## Live Demo
+
+Visit the live map at <https://vitopalumbopodcast.github.io/Geostoria/>.
+
 ## Serving the Site Locally
 
 The project is a static website. From the repository root run:
