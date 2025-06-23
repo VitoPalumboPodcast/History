@@ -69,6 +69,16 @@
       height: 65vh;
     }
 
+    .event-label {
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      padding: 2px 4px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: bold;
+      text-shadow: 0 0 3px #000;
+    }
+
     /* Vis.js Timeline Item Styling */
     .vis-item {
       color: #000; /* Text color inside items */
@@ -341,7 +351,14 @@
       // Add event markers and store references
       const eventMarkers = {};
       for (const evt of events) {
-        const marker = L.marker(evt.latlng).addTo(map).bindPopup(evt.popup);
+        const marker = L.marker(evt.latlng)
+          .addTo(map)
+          .bindPopup(evt.popup);
+        marker.bindTooltip(evt.content, {
+          permanent: true,
+          direction: 'top',
+          className: 'event-label'
+        });
         eventMarkers[evt.id] = marker;
         marker.on('click', () => {
           if (timeline) {
