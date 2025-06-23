@@ -39,5 +39,12 @@ const objects = [
     type: 'marker',
     latlng: [32.5, 35],
     popup: 'Ancient Site (Mar-May 2023)'
+  },
+  {
+    start: '2022-04-01',
+    end: '2022-04-15',
+    type: 'marker',
+    latlng: [25, 25],
+    popup: 'Classical Ruins (Apr 1-15, 2022)'
   }
 ];
