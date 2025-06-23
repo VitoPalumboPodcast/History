@@ -2,6 +2,16 @@
 
 This project displays historical empires on a map with a timeline indicator.
 
+## Serving the Site Locally
+
+The project is a static website. From the repository root run:
+
+```bash
+python -m http.server
+```
+
+Then open <http://localhost:8000> in your browser to view the map.
+
 ## Empire Data Format
 
 Empires are defined in `js/empires.js`. Each entry contains a list of
@@ -31,6 +41,28 @@ coordinate while polylines and polygons use `coordinates` arrays. Optional
 properties such as `popup` text or a Leaflet `style` object control how the
 object is displayed. `updateObjects()` shows or hides these layers based on the
 visible timeline range.
+
+## Modifying Events, Empires and Objects
+
+* **Events** are listed in `js/data.js` as an array named `events`. Each entry
+  includes an `id`, `content`, `start`, `end`, a `latlng` coordinate and optional
+  `popup` text.
+* **Empires** are defined in `js/empires.js` under the `empires` array. Empires
+  contain one or more `segments` with `start`, `end` and polygon `coordinates`
+  describing how their territory changes over time.
+* **Objects** such as markers, polylines and polygons live in `js/objects.js` in
+  the `objects` array. They use `start` and `end` dates along with geometry and
+  optional `style` and `popup` properties.
+
+Edit these files to add or update entries. Reload the page after making changes
+to see the updated map.
+
+## Browser Requirements
+
+The application uses [Leaflet](https://leafletjs.com/) 1.9.4 and the latest
+version of [vis-timeline](https://visjs.github.io/vis-timeline/). A modern
+browser with ES6 support such as recent versions of Chrome, Firefox or Edge is
+recommended.
 
 ## License
 
