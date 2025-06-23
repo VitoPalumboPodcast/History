@@ -61,6 +61,11 @@ visible timeline range.
 Edit these files to add or update entries. Reload the page after making changes
 to see the updated map.
 
+## Customizing Styles
+
+All page styling lives in `css/style.css`. Modify this file if you want to
+change colors, layout or other visual aspects of the map.
+
 ## Browser Requirements
 
 The application uses [Leaflet](https://leafletjs.com/) 1.9.4 and the latest
