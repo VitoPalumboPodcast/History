@@ -63,8 +63,8 @@ to see the updated map.
 
 ## Browser Requirements
 
-The application uses [Leaflet](https://leafletjs.com/) 1.9.4 and the latest
-version of [vis-timeline](https://visjs.github.io/vis-timeline/). A modern
+The application uses [Leaflet](https://leafletjs.com/) 1.9.4 and
+[vis-timeline](https://visjs.github.io/vis-timeline/) 7.7.0. A modern
 browser with ES6 support such as recent versions of Chrome, Firefox or Edge is
 recommended.
 
