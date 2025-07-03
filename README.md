@@ -58,6 +58,9 @@ visible timeline range.
   the `objects` array. They use `start` and `end` dates along with geometry and
   optional `style` and `popup` properties.
 
+Dates may also represent BC years by prefixing the year with a minus sign,
+e.g. `-44-03-15` for 44&nbsp;BC. These values are parsed automatically.
+
 Edit these files to add or update entries. Reload the page after making changes
 to see the updated map.
 

@@ -348,6 +348,17 @@
         attribution: '© OpenStreetMap contributors'
       }).addTo(map);
 
+      function parseDate(str) {
+        if (typeof str === 'string' && str.startsWith('-')) {
+          const parts = str.slice(1).split('-');
+          const year = -Number(parts[0]);
+          const month = Number(parts[1] || 1);
+          const day = Number(parts[2] || 1);
+          return new Date(year, month - 1, day);
+        }
+        return new Date(str);
+      }
+
       // Add event markers and store references
       const eventMarkers = {};
       for (const evt of events) {
@@ -402,13 +413,13 @@
 
       function updateOverallTimeRange(startTimeStr, endTimeStr) {
         if (startTimeStr) {
-          const startTime = new Date(startTimeStr).getTime();
+          const startTime = parseDate(startTimeStr).getTime();
           if (!isNaN(startTime) && startTime < minTimelineEdge) {
             minTimelineEdge = startTime;
           }
         }
         if (endTimeStr) {
-          const endTime = new Date(endTimeStr).getTime();
+          const endTime = parseDate(endTimeStr).getTime();
           if (!isNaN(endTime) && endTime > maxTimelineEdge) {
             maxTimelineEdge = endTime;
           }
@@ -490,8 +501,8 @@
           const layer = info.layer;
           let activeSegment = null;
           for (const s of emp.segments) {
-            const segStart = new Date(s.start);
-            const segEnd = new Date(s.end);
+            const segStart = parseDate(s.start);
+            const segEnd = parseDate(s.end);
             // Check for overlap: (SegStart <= ViewEnd) and (SegEnd >= ViewStart)
             if (segStart <= viewEnd && segEnd >= viewStart) {
               activeSegment = s;
@@ -517,8 +528,8 @@
         for (const item of objectLayers) {
           const obj = item.obj;
           const layer = item.layer;
-          const objStart = new Date(obj.start);
-          const objEnd = new Date(obj.end);
+          const objStart = parseDate(obj.start);
+          const objEnd = parseDate(obj.end);
           // Check for overlap: (ObjStart <= ViewEnd) and (ObjEnd >= ViewStart)
           if (objStart <= viewEnd && objEnd >= viewStart) {
             if (!map.hasLayer(layer)) {

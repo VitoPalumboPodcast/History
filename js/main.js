@@ -4,6 +4,18 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap contributors'
 }).addTo(map);
 
+// Helper to parse dates including negative years (BC)
+function parseDate(str) {
+  if (typeof str === 'string' && str.startsWith('-')) {
+    const parts = str.slice(1).split('-');
+    const year = -Number(parts[0]);
+    const month = Number(parts[1] || 1);
+    const day = Number(parts[2] || 1);
+    return new Date(year, month - 1, day);
+  }
+  return new Date(str);
+}
+
 // Add markers and store references
 const markers = {};
 for (const evt of events) {
@@ -45,13 +57,13 @@ let maxTimelineEdge = new Date('0000-01-01').getTime();
 
 function updateOverallTimeRange(startTimeStr, endTimeStr) {
   if (startTimeStr) {
-    const startTime = new Date(startTimeStr).getTime();
+    const startTime = parseDate(startTimeStr).getTime();
     if (!isNaN(startTime) && startTime < minTimelineEdge) {
       minTimelineEdge = startTime;
     }
   }
   if (endTimeStr) {
-    const endTime = new Date(endTimeStr).getTime();
+    const endTime = parseDate(endTimeStr).getTime();
     if (!isNaN(endTime) && endTime > maxTimelineEdge) {
       maxTimelineEdge = endTime;
     }
@@ -146,8 +158,8 @@ function updateEmpires() {
 
     let seg = null;
     for (const s of emp.segments) {
-      const segStart = new Date(s.start);
-      const segEnd = new Date(s.end);
+      const segStart = parseDate(s.start);
+      const segEnd = parseDate(s.end);
       if (segEnd >= start && segStart <= end) {
         seg = s;
         break;
@@ -177,8 +189,8 @@ function updateObjects() {
   for (const item of objectLayers) {
     const obj = item.obj;
     const layer = item.layer;
-    const objStart = new Date(obj.start);
-    const objEnd = new Date(obj.end);
+    const objStart = parseDate(obj.start);
+    const objEnd = parseDate(obj.end);
     if (objEnd >= start && objStart <= end) {
       if (!map.hasLayer(layer)) {
         layer.addTo(map);
