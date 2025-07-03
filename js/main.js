@@ -97,8 +97,6 @@ const yearLabel = document.getElementById('year-label');
 const items = new vis.DataSet(events);
 const options = {
   height: '100%',
-  min: timelineMin,
-  max: timelineMax,
   start: timelineMin,
   end: new Date(Math.max(timelineMin.getTime() + (30 * 24 * 60 * 60 * 1000), timelineMax.getTime())),
   zoomMin: 1000 * 60 * 60 * 24 * 7,
