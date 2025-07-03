@@ -26,17 +26,33 @@ for (const emp of empires) {
 const objectLayers = [];
 for (const obj of objects) {
   let layer;
+  let decorator = null;
   if (obj.type === 'marker') {
     layer = L.marker(obj.latlng, obj.style || {}); // Pass empty object if style is undefined
   } else if (obj.type === 'polyline') {
     layer = L.polyline(obj.coordinates, obj.style);
+    if (obj.showArrows) {
+      decorator = L.polylineDecorator(layer, {
+        patterns: [
+          {
+            offset: '5%',
+            repeat: '20%',
+            symbol: L.Symbol.arrowHead({
+              pixelSize: 8,
+              polygon: false,
+              pathOptions: { color: layer.options.color || '#000', weight: layer.options.weight || 2 }
+            })
+          }
+        ]
+      });
+    }
   } else if (obj.type === 'polygon') {
     layer = L.polygon(obj.coordinates, obj.style);
   }
   if (obj.popup) {
     layer.bindPopup(obj.popup);
   }
-  objectLayers.push({ obj, layer });
+  objectLayers.push({ obj, layer, decorator });
 }
 
 // calculate global time range
@@ -177,14 +193,21 @@ function updateObjects() {
   for (const item of objectLayers) {
     const obj = item.obj;
     const layer = item.layer;
+    const decorator = item.decorator;
     const objStart = new Date(obj.start);
     const objEnd = new Date(obj.end);
     if (objEnd >= start && objStart <= end) {
       if (!map.hasLayer(layer)) {
         layer.addTo(map);
       }
+      if (decorator && !map.hasLayer(decorator)) {
+        decorator.addTo(map);
+      }
     } else if (map.hasLayer(layer)) {
       map.removeLayer(layer);
+      if (decorator && map.hasLayer(decorator)) {
+        map.removeLayer(decorator);
+      }
     }
   }
 }
