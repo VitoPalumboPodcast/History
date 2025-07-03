@@ -16,7 +16,8 @@ const objects = [
       [48, 5]
     ],
     style: { color: '#ff8800', weight: 3 },
-    popup: 'Trade Route (Feb 10-25)'
+    popup: 'Trade Route (Feb 10-25)',
+    decorated: true
   },
   {
     start: '2024-03-10',
@@ -57,7 +58,8 @@ const objects = [
       [37.5, 22.0]  // Peloponneso
     ],
     style: { color: '#00ffff', weight: 2 },
-    popup: 'Dorian migration path (~1200-1000 BC)'
+    popup: 'Dorian migration path (~1200-1000 BC)',
+    decorated: true
   },
   {
     start: '-1000-01-01',

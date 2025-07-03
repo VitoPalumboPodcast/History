@@ -117,6 +117,7 @@
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-polylinedecorator@1.7.0/dist/leaflet.polylineDecorator.min.js"></script>
   <script src="https://unpkg.com/vis-timeline@7.7.0/dist/vis-timeline-graph2d.min.js"></script>
 
   <script>
@@ -328,7 +329,8 @@
           [48, 5]   // East of Paris
         ],
         style: { color: '#ff8800', weight: 3 },
-        popup: 'Trade Route (Feb 10-25)'
+        popup: 'Trade Route (Feb 10-25)',
+        decorated: true
       },
       {
         start: '2024-03-10',
@@ -369,7 +371,8 @@
           [37.5, 22.0]  // Peloponneso
         ],
         style: { color: '#00ffff', weight: 2 },
-        popup: 'Dorian migration path (~1200-1000 BC)'
+        popup: 'Dorian migration path (~1200-1000 BC)',
+        decorated: true
       },
       {
         start: '-1000-01-01',
@@ -442,10 +445,26 @@
       const objectLayers = [];
       for (const obj of objects) {
         let layer;
+        let decorator;
         if (obj.type === 'marker') {
           layer = L.marker(obj.latlng, obj.style || {});
         } else if (obj.type === 'polyline') {
           layer = L.polyline(obj.coordinates, obj.style);
+          if (obj.decorated) {
+            decorator = L.polylineDecorator(layer, {
+              patterns: [
+                {
+                  offset: '5%',
+                  repeat: '10%',
+                  symbol: L.Symbol.arrowHead({
+                    pixelSize: 8,
+                    polygon: false,
+                    pathOptions: { stroke: true, color: layer.options.color || '#000' }
+                  })
+                }
+              ]
+            });
+          }
         } else if (obj.type === 'polygon') {
           layer = L.polygon(obj.coordinates, obj.style);
         }
@@ -453,7 +472,11 @@
           layer.bindPopup(obj.popup);
         }
         if (layer) {
-          objectLayers.push({ obj, layer });
+          const entry = { obj, layer };
+          if (decorator) {
+            entry.decorator = decorator;
+          }
+          objectLayers.push(entry);
         }
       }
 
@@ -578,6 +601,7 @@
         for (const item of objectLayers) {
           const obj = item.obj;
           const layer = item.layer;
+          const decorator = item.decorator;
           const objStart = parseDate(obj.start);
           const objEnd = parseDate(obj.end);
           // Check for overlap: (ObjStart <= ViewEnd) and (ObjEnd >= ViewStart)
@@ -585,8 +609,16 @@
             if (!map.hasLayer(layer)) {
               layer.addTo(map);
             }
-          } else if (map.hasLayer(layer)) {
-            map.removeLayer(layer);
+            if (decorator && !map.hasLayer(decorator)) {
+              decorator.addTo(map);
+            }
+          } else {
+            if (map.hasLayer(layer)) {
+              map.removeLayer(layer);
+            }
+            if (decorator && map.hasLayer(decorator)) {
+              map.removeLayer(decorator);
+            }
           }
         }
       }
