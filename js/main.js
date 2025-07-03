@@ -1,288 +1,270 @@
-// Initialize map with a wider view
-const map = L.map('map').setView([45, 5], 4);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap contributors'
-}).addTo(map);
+      // Initialize map
+      const map = L.map('map').setView([45, 5], 4); // Wider initial view
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
 
-// Helper to parse dates including negative years (BC)
-function parseDate(str) {
-  if (typeof str === 'string' && str.startsWith('-')) {
-    const parts = str.slice(1).split('-');
-    const year = -Number(parts[0]);
-    const month = Number(parts[1] || 1);
-    const day = Number(parts[2] || 1);
-    return new Date(year, month - 1, day);
-  }
-  return new Date(str);
-}
+      function parseDate(str) {
+        if (typeof str === 'string' && str.startsWith('-')) {
+          const parts = str.slice(1).split('-');
+          const year = -Number(parts[0]);
+          const month = Number(parts[1] || 1);
+          const day = Number(parts[2] || 1);
+          return new Date(year, month - 1, day);
+        }
+        return new Date(str);
+      }
 
-// Add markers and store references (initially hidden)
-const markers = {};
-for (const evt of events) {
-  const marker = L.marker(evt.latlng).bindPopup(evt.popup);
-  // optional tooltip showing event content
-  if (evt.content) {
-    marker.bindTooltip(evt.content, {
-      permanent: true,
-      direction: 'top',
-      className: 'event-label'
-    });
-  }
-  markers[evt.id] = marker;
-  marker.on('click', () => {
-    timeline.setSelection(evt.id, { focus: true });
-  });
-}
-
-// Prepare empire layers
-const empireLayers = {};
-for (const emp of empires) {
-  const firstSeg = emp.segments[0];
-  const layer = L.polygon(firstSeg.coordinates, emp.style).bindPopup(emp.name);
-  empireLayers[emp.name] = { layer, currentSegment: null };
-}
-
-// Prepare additional object layers
-const objectLayers = [];
-for (const obj of objects) {
-  let layer;
-  let decorator;
-  if (obj.type === 'marker') {
-    layer = L.marker(obj.latlng, obj.style || {}); // Pass empty object if style is undefined
-  } else if (obj.type === 'polyline') {
-    layer = L.polyline(obj.coordinates, obj.style);
-    if (obj.decorated) {
-      decorator = L.polylineDecorator(layer, {
-        patterns: [
-          {
-            offset: '5%',
-            repeat: '10%',
-            symbol: L.Symbol.arrowHead({
-              pixelSize: 8,
-              polygon: false,
-              pathOptions: { stroke: true, color: layer.options.color || '#000' }
-            })
+      // Add event markers and store references
+      const eventMarkers = {};
+      for (const evt of events) {
+        const marker = L.marker(evt.latlng)
+          .bindPopup(evt.popup);
+        marker.bindTooltip(evt.content, {
+          permanent: true,
+          direction: 'top',
+          className: 'event-label'
+        });
+        eventMarkers[evt.id] = marker;
+        marker.on('click', () => {
+          if (timeline) {
+            timeline.setSelection(evt.id, { focus: true });
           }
-        ]
+        });
+      }
+
+      // Prepare empire layers
+      const empireLayers = {};
+      for (const emp of empires) {
+        // Initial coordinates are not strictly necessary as they'll be set by updateEmpires
+        // But providing first segment's coordinates can prevent an error if update is delayed.
+        const firstSeg = emp.segments.length > 0 ? emp.segments[0] : { coordinates: [] };
+        const layer = L.polygon(firstSeg.coordinates, emp.style).bindPopup(emp.name);
+        empireLayers[emp.name] = { layer, currentSegment: null };
+      }
+
+      // Prepare additional object layers
+      const objectLayers = [];
+      for (const obj of objects) {
+        let layer;
+        let decorator;
+        if (obj.type === 'marker') {
+          layer = L.marker(obj.latlng, obj.style || {});
+        } else if (obj.type === 'polyline') {
+          layer = L.polyline(obj.coordinates, obj.style);
+          if (obj.decorated) {
+            decorator = L.polylineDecorator(layer, {
+              patterns: [
+                {
+                  offset: '5%',
+                  repeat: '10%',
+                  symbol: L.Symbol.arrowHead({
+                    pixelSize: 8,
+                    polygon: false,
+                    pathOptions: { stroke: true, color: layer.options.color || '#000' }
+                  })
+                }
+              ]
+            });
+          }
+        } else if (obj.type === 'polygon') {
+          layer = L.polygon(obj.coordinates, obj.style);
+        }
+        if (layer && obj.popup) {
+          layer.bindPopup(obj.popup);
+        }
+        if (layer) {
+          const entry = { obj, layer };
+          if (decorator) {
+            entry.decorator = decorator;
+          }
+          objectLayers.push(entry);
+        }
+      }
+
+      // Calculate global time range
+      let minTimelineEdge = new Date('9999-12-31').getTime();
+      let maxTimelineEdge = new Date('0000-01-01').getTime();
+
+      function updateOverallTimeRange(startTimeStr, endTimeStr) {
+        if (startTimeStr) {
+          const startTime = parseDate(startTimeStr).getTime();
+          if (!isNaN(startTime) && startTime < minTimelineEdge) {
+            minTimelineEdge = startTime;
+          }
+        }
+        if (endTimeStr) {
+          const endTime = parseDate(endTimeStr).getTime();
+          if (!isNaN(endTime) && endTime > maxTimelineEdge) {
+            maxTimelineEdge = endTime;
+          }
+        }
+      }
+
+      events.forEach(evt => updateOverallTimeRange(evt.start, evt.end));
+      empires.forEach(emp => emp.segments.forEach(seg => updateOverallTimeRange(seg.start, seg.end)));
+      objects.forEach(obj => updateOverallTimeRange(obj.start, obj.end));
+      
+      if (minTimelineEdge > maxTimelineEdge) { // Fallback if no valid dates
+          const now = new Date();
+          minTimelineEdge = new Date(now.getFullYear(), 0, 1).getTime(); // Jan 1st of current year
+          maxTimelineEdge = new Date(now.getFullYear(), 11, 31).getTime(); // Dec 31st of current year
+          if (minTimelineEdge > maxTimelineEdge) { // Should not happen with current logic
+            minTimelineEdge = new Date(2000,0,1).getTime();
+            maxTimelineEdge = new Date(2000,11,31).getTime();
+          }
+      }
+      
+      const timelineMin = new Date(minTimelineEdge);
+      const timelineMax = new Date(maxTimelineEdge);
+
+      // Initialize timeline
+      const timelineEl = document.getElementById('timeline');
+      const yearLabel = document.getElementById('year-label');
+
+      const timelineItems = new vis.DataSet(events);
+      const timelineOptions = {
+        height: '100%',
+        start: timelineMin,
+        end: new Date(Math.max(timelineMin.getTime() + (30 * 24 * 60 * 60 * 1000), timelineMax.getTime())), // Ensure at least a 30-day window or full range
+        // Allow zooming in to one day and out to roughly the limits of the
+        // JavaScript Date range (~275k years)
+        zoomMin: 1000 * 60 * 60 * 24, // Minimum zoom level: 1 day
+        zoomMax: 8640000000000000 // Max zoom level: about 275k years
+      };
+      
+      if (timelineOptions.end.getTime() <= timelineOptions.start.getTime()) {
+        timelineOptions.end = new Date(timelineOptions.start.getTime() + 30 * 24 * 60 * 60 * 1000); // Add 30 days
+      }
+
+      if (!window.vis) {
+        console.warn('Timeline library failed to load');
+        yearLabel.textContent = 'Timeline library failed to load';
+        return;
+      }
+
+      const timeline = new vis.Timeline(timelineEl, timelineItems, timelineOptions);
+
+      function updateIndicator() {
+        if (!timeline) return;
+        const windowRange = timeline.getWindow();
+        if (windowRange.start && windowRange.end) {
+            const centerTime = (windowRange.start.getTime() + windowRange.end.getTime()) / 2;
+            const centerDate = new Date(centerTime);
+            yearLabel.textContent = centerDate.toLocaleDateString(undefined, { year: 'numeric', month: 'short' });
+        } else {
+            yearLabel.textContent = "N/A";
+        }
+      }
+
+      timeline.on('select', props => {
+        const id = props.items[0];
+        if (id && eventMarkers[id]) {
+          const marker = eventMarkers[id];
+          map.setView(marker.getLatLng(), 8); // Zoom level 8 when selecting an event
+          marker.openPopup();
+        }
       });
-    }
-  } else if (obj.type === 'polygon') {
-    layer = L.polygon(obj.coordinates, obj.style);
-  }
-  if (obj.popup) {
-    layer.bindPopup(obj.popup);
-  }
-  const entry = { obj, layer };
-  if (decorator) {
-    entry.decorator = decorator;
-  }
-  objectLayers.push(entry);
-}
+      
+      function updateMapLayers() {
+        if (!timeline) return;
+        const range = timeline.getWindow();
+        if (!range.start || !range.end) return; // Timeline not ready
 
-// calculate global time range
-let minTimelineEdge = new Date('9999-12-31').getTime();
-let maxTimelineEdge = new Date('0000-01-01').getTime();
+        const viewStart = range.start;
+        const viewEnd = range.end;
 
-function updateOverallTimeRange(startTimeStr, endTimeStr) {
-  if (startTimeStr) {
-    const startTime = parseDate(startTimeStr).getTime();
-    if (!isNaN(startTime) && startTime < minTimelineEdge) {
-      minTimelineEdge = startTime;
-    }
-  }
-  if (endTimeStr) {
-    const endTime = parseDate(endTimeStr).getTime();
-    if (!isNaN(endTime) && endTime > maxTimelineEdge) {
-      maxTimelineEdge = endTime;
-    }
-  }
-}
+        // Update Empires
+        for (const emp of empires) {
+          const info = empireLayers[emp.name];
+          if (!info) continue;
+          const layer = info.layer;
+          let activeSegment = null;
+          for (const s of emp.segments) {
+            const segStart = parseDate(s.start);
+            const segEnd = parseDate(s.end);
+            // Check for overlap: (SegStart <= ViewEnd) and (SegEnd >= ViewStart)
+            if (segStart <= viewEnd && segEnd >= viewStart) {
+              activeSegment = s;
+              break; 
+            }
+          }
 
-for (const evt of events) {
-  updateOverallTimeRange(evt.start, evt.end);
-}
+          if (activeSegment) {
+            if (info.currentSegment !== activeSegment) {
+              layer.setLatLngs(activeSegment.coordinates);
+              info.currentSegment = activeSegment;
+            }
+            if (!map.hasLayer(layer)) {
+              layer.addTo(map);
+            }
+          } else if (map.hasLayer(layer)) {
+            map.removeLayer(layer);
+            info.currentSegment = null;
+          }
+        }
 
-for (const emp of empires) {
-  for (const seg of emp.segments) {
-    updateOverallTimeRange(seg.start, seg.end);
-  }
-}
+        // Update Objects
+        for (const item of objectLayers) {
+          const obj = item.obj;
+          const layer = item.layer;
+          const decorator = item.decorator;
+          const objStart = parseDate(obj.start);
+          const objEnd = parseDate(obj.end);
+          // Check for overlap: (ObjStart <= ViewEnd) and (ObjEnd >= ViewStart)
+          if (objStart <= viewEnd && objEnd >= viewStart) {
+            if (!map.hasLayer(layer)) {
+              layer.addTo(map);
+            }
+            if (decorator && !map.hasLayer(decorator)) {
+              decorator.addTo(map);
+            }
+          } else {
+            if (map.hasLayer(layer)) {
+              map.removeLayer(layer);
+            }
+            if (decorator && map.hasLayer(decorator)) {
+              map.removeLayer(decorator);
+            }
+          }
+        }
 
-for (const obj of objects) {
-  updateOverallTimeRange(obj.start, obj.end);
-}
-
-// Handle case where no dates were found (e.g., all data arrays empty)
-if (minTimelineEdge === new Date('9999-12-31').getTime() || maxTimelineEdge === new Date('0000-01-01').getTime()) {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    minTimelineEdge = new Date(currentYear, 0, 1).getTime(); // Jan 1st of current year
-    maxTimelineEdge = new Date(currentYear, 11, 31).getTime(); // Dec 31st of current year
-    // If still default (e.g. current year is 9999 or 0000), set a more reasonable default
-    if (minTimelineEdge > maxTimelineEdge) {
-        minTimelineEdge = new Date(2000, 0, 1).getTime();
-        maxTimelineEdge = new Date(2000, 11, 31).getTime();
-    }
-}
-
-const timelineMin = new Date(minTimelineEdge);
-const timelineMax = new Date(maxTimelineEdge);
-
-// Initialize timeline
-const timelineEl = document.getElementById('timeline');
-const timelineContainer = document.getElementById('timeline-container');
-const indicator = document.getElementById('indicator');
-const yearLabel = document.getElementById('year-label');
-
-const items = new vis.DataSet(events);
-const options = {
-  height: '100%',
-  start: timelineMin,
-  end: new Date(Math.max(timelineMin.getTime() + (30 * 24 * 60 * 60 * 1000), timelineMax.getTime())),
-  // Allow zooming in to one day and out to roughly the limits of the
-  // JavaScript Date range (~275k years)
-  zoomMin: 1000 * 60 * 60 * 24,
-  zoomMax: 8640000000000000
-};
-if (options.end.getTime() <= options.start.getTime()) {
-  options.end = new Date(options.start.getTime() + 30 * 24 * 60 * 60 * 1000);
-}
-
-if (!window.vis) {
-  console.warn('Timeline library failed to load');
-  yearLabel.textContent = 'Timeline library failed to load';
-  return;
-}
-
-const timeline = new vis.Timeline(timelineEl, items, options);
-
-function updateIndicator() {
-  const windowRange = timeline.getWindow();
-  const center = new Date((windowRange.start.getTime() + windowRange.end.getTime()) / 2);
-  yearLabel.textContent = center.getFullYear();
-}
-
-timeline.on('rangechanged', updateIndicator);
-// Call updateIndicator after timeline is fully initialized and has a window
-timeline.on('changed', () => {
-    updateIndicator();
-    updateEmpires();
-    updateObjects();
-    updateEventMarkers();
-});
-// Initial calls are still good for first load before 'changed' might fire or to ensure state.
-updateIndicator();
-
-timeline.on('select', props => {
-  const id = props.items[0];
-  if (id && markers[id]) {
-    const marker = markers[id];
-    map.setView(marker.getLatLng(), 8);
-    marker.openPopup();
-  }
-});
-
-function updateEmpires() {
-  const range = timeline.getWindow();
-  const start = range.start;
-  const end = range.end;
-
-  for (const emp of empires) {
-    const info = empireLayers[emp.name];
-    const layer = info.layer;
-
-    let seg = null;
-    for (const s of emp.segments) {
-      const segStart = parseDate(s.start);
-      const segEnd = parseDate(s.end);
-      if (segEnd >= start && segStart <= end) {
-        seg = s;
-        break;
+        // Update Events
+        for (const evt of events) {
+          const marker = eventMarkers[evt.id];
+          const evtStart = parseDate(evt.start);
+          const evtEnd = parseDate(evt.end);
+          if (evtStart <= viewEnd && evtEnd >= viewStart) {
+            if (!map.hasLayer(marker)) {
+              marker.addTo(map);
+            }
+          } else if (map.hasLayer(marker)) {
+            map.removeLayer(marker);
+          }
+        }
       }
-    }
 
-    if (seg) {
-      if (info.currentSegment !== seg) {
-        layer.setLatLngs(seg.coordinates);
-        info.currentSegment = seg;
-      }
-      if (!map.hasLayer(layer)) {
-        layer.addTo(map);
-      }
-    } else if (map.hasLayer(layer)) {
-      map.removeLayer(layer);
-      info.currentSegment = null;
-    }
-  }
-}
+      timeline.on('changed', () => {
+          updateIndicator();
+          updateMapLayers();
+      });
 
-function updateObjects() {
-  const range = timeline.getWindow();
-  const start = range.start;
-  const end = range.end;
+      // Initial updates after everything is set up
+      // Use a small timeout to ensure DOM and libraries are fully ready
+      setTimeout(() => {
+        updateIndicator();
+        updateMapLayers();
+        if (timelineItems.length > 0) { // If there are items, fit timeline to them
+            timeline.fit();
+            const firstEvent = events.find(e => e.id === timelineItems.getIds()[0]);
+            if (firstEvent && firstEvent.latlng) {
+                 map.setView(firstEvent.latlng, 5); // Center map on the first event initially
+            }
+        } else { // Fallback if no items
+            timeline.setWindow(timelineMin, timelineMax);
+        }
+        // Then re-run updates based on the new window
+        updateIndicator();
+        updateMapLayers();
+      }, 100);
 
-  for (const item of objectLayers) {
-    const obj = item.obj;
-    const layer = item.layer;
-    const decorator = item.decorator;
-    const objStart = parseDate(obj.start);
-    const objEnd = parseDate(obj.end);
-    if (objEnd >= start && objStart <= end) {
-      if (!map.hasLayer(layer)) {
-        layer.addTo(map);
-      }
-      if (decorator && !map.hasLayer(decorator)) {
-        decorator.addTo(map);
-      }
-    } else {
-      if (map.hasLayer(layer)) {
-        map.removeLayer(layer);
-      }
-      if (decorator && map.hasLayer(decorator)) {
-        map.removeLayer(decorator);
-      }
-    }
-  }
-}
-
-// Show or hide event markers based on timeline window
-function updateEventMarkers() {
-  const range = timeline.getWindow();
-  const start = range.start;
-  const end = range.end;
-
-  for (const evt of events) {
-    const marker = markers[evt.id];
-    if (!marker) continue;
-    const evtStart = parseDate(evt.start);
-    const evtEnd = parseDate(evt.end);
-    if (evtEnd >= start && evtStart <= end) {
-      if (!map.hasLayer(marker)) {
-        marker.addTo(map);
-      }
-    } else if (map.hasLayer(marker)) {
-      map.removeLayer(marker);
-    }
-  }
-}
-
-// Initial updates after timeline and map are ready
-setTimeout(() => {
-  updateIndicator();
-  updateEmpires();
-  updateObjects();
-  updateEventMarkers();
-  if (items.getIds().length > 0) {
-    timeline.fit();
-    const firstEvent = events.find(e => e.id === items.getIds()[0]);
-    if (firstEvent && firstEvent.latlng) {
-      map.setView(firstEvent.latlng, 5);
-    }
-  } else {
-    timeline.setWindow(timelineMin, timelineMax);
-  }
-  updateIndicator();
-  updateEmpires();
-  updateObjects();
-  updateEventMarkers();
-}, 100);
