@@ -38,5 +38,29 @@ const events = [
     end: '2022-06-02',
     latlng: [37.98, 23.72],
     popup: 'Athens Festival (Jun 1-2, 2022)'
+  },
+  {
+    id: 6,
+    content: 'Dorian origin (Northern Greece)',
+    start: '-1200-01-01',
+    end: '-1200-01-02',
+    latlng: [40.5, 22.0],
+    popup: 'Dorians located in Thessaly/Macedonia (~1200 BC)'
+  },
+  {
+    id: 7,
+    content: 'Dorians move toward Pindus',
+    start: '-1100-01-01',
+    end: '-1100-01-02',
+    latlng: [39.3, 21.0],
+    popup: 'Migration south to the Pindus range (~1100 BC)'
+  },
+  {
+    id: 8,
+    content: 'Dorians enter Peloponneso',
+    start: '-1000-01-01',
+    end: '-1000-01-02',
+    latlng: [37.5, 22.0],
+    popup: 'Arrival of Dorians in Peloponnesus (~1000 BC)'
   }
 ];

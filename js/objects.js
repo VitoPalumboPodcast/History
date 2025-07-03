@@ -46,5 +46,31 @@ const objects = [
     type: 'marker',
     latlng: [25, 25],
     popup: 'Classical Ruins (Apr 1-15, 2022)'
+  },
+  {
+    start: '-1200-01-01',
+    end: '-1000-01-01',
+    type: 'polyline',
+    coordinates: [
+      [40.5, 22.0], // Thessaly/Macedonia
+      [39.3, 21.0], // Pindus region
+      [37.5, 22.0]  // Peloponneso
+    ],
+    style: { color: '#00ffff', weight: 2 },
+    popup: 'Dorian migration path (~1200-1000 BC)'
+  },
+  {
+    start: '-1000-01-01',
+    end: '-1000-01-02',
+    type: 'marker',
+    latlng: [37.07, 22.43],
+    popup: 'Sparta settled by Dorians'
+  },
+  {
+    start: '-1000-01-01',
+    end: '-1000-01-02',
+    type: 'marker',
+    latlng: [37.94, 22.93],
+    popup: 'Corinth as a Dorian center'
   }
 ];
