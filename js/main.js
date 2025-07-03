@@ -148,6 +148,12 @@ if (options.end.getTime() <= options.start.getTime()) {
   options.end = new Date(options.start.getTime() + 30 * 24 * 60 * 60 * 1000);
 }
 
+if (!window.vis) {
+  console.warn('Timeline library failed to load');
+  yearLabel.textContent = 'Timeline library failed to load';
+  return;
+}
+
 const timeline = new vis.Timeline(timelineEl, items, options);
 
 function updateIndicator() {
