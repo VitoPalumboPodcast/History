@@ -1,3 +1,20 @@
+const yearLabel = document.getElementById('year-label');
+// Ensure required libraries loaded
+if (!window.L) {
+  console.warn('Leaflet library failed to load');
+  if (yearLabel) {
+    yearLabel.textContent = 'Leaflet library failed to load';
+  }
+  throw new Error('Leaflet library failed to load');
+}
+if (!window.vis) {
+  console.warn('Timeline library failed to load');
+  if (yearLabel) {
+    yearLabel.textContent = 'Timeline library failed to load';
+  }
+  throw new Error('Timeline library failed to load');
+}
+
 // Initialize map with a wider view
 const map = L.map('map').setView([45, 5], 4);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -136,7 +153,6 @@ const timelineMax = new Date(maxTimelineEdge);
 const timelineEl = document.getElementById('timeline');
 const timelineContainer = document.getElementById('timeline-container');
 const indicator = document.getElementById('indicator');
-const yearLabel = document.getElementById('year-label');
 
 const items = new vis.DataSet(events);
 const options = {
@@ -150,12 +166,6 @@ const options = {
 };
 if (options.end.getTime() <= options.start.getTime()) {
   options.end = new Date(options.start.getTime() + 30 * 24 * 60 * 60 * 1000);
-}
-
-if (!window.vis) {
-  console.warn('Timeline library failed to load');
-  yearLabel.textContent = 'Timeline library failed to load';
-  return;
 }
 
 const timeline = new vis.Timeline(timelineEl, items, options);
