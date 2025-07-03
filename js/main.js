@@ -16,10 +16,18 @@ function parseDate(str) {
   return new Date(str);
 }
 
-// Add markers and store references
+// Add markers and store references (initially hidden)
 const markers = {};
 for (const evt of events) {
-  const marker = L.marker(evt.latlng).addTo(map).bindPopup(evt.popup);
+  const marker = L.marker(evt.latlng).bindPopup(evt.popup);
+  // optional tooltip showing event content
+  if (evt.content) {
+    marker.bindTooltip(evt.content, {
+      permanent: true,
+      direction: 'top',
+      className: 'event-label'
+    });
+  }
   markers[evt.id] = marker;
   marker.on('click', () => {
     timeline.setSelection(evt.id, { focus: true });
@@ -154,6 +162,7 @@ timeline.on('changed', () => {
     updateIndicator();
     updateEmpires();
     updateObjects();
+    updateEventMarkers();
 });
 // Initial calls are still good for first load before 'changed' might fire or to ensure state.
 updateIndicator();
@@ -230,11 +239,33 @@ function updateObjects() {
   }
 }
 
+// Show or hide event markers based on timeline window
+function updateEventMarkers() {
+  const range = timeline.getWindow();
+  const start = range.start;
+  const end = range.end;
+
+  for (const evt of events) {
+    const marker = markers[evt.id];
+    if (!marker) continue;
+    const evtStart = parseDate(evt.start);
+    const evtEnd = parseDate(evt.end);
+    if (evtEnd >= start && evtStart <= end) {
+      if (!map.hasLayer(marker)) {
+        marker.addTo(map);
+      }
+    } else if (map.hasLayer(marker)) {
+      map.removeLayer(marker);
+    }
+  }
+}
+
 // Initial updates after timeline and map are ready
 setTimeout(() => {
   updateIndicator();
   updateEmpires();
   updateObjects();
+  updateEventMarkers();
   if (items.getIds().length > 0) {
     timeline.fit();
     const firstEvent = events.find(e => e.id === items.getIds()[0]);
@@ -247,4 +278,5 @@ setTimeout(() => {
   updateIndicator();
   updateEmpires();
   updateObjects();
+  updateEventMarkers();
 }, 100);
