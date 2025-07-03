@@ -63,6 +63,7 @@ e.g. `-44-03-15` for 44&nbsp;BC. These values are parsed automatically.
 
 Edit these files to add or update entries. Reload the page after making changes
 to see the updated map.
+The HTML page loads `js/data.js`, `js/empires.js`, `js/objects.js` and `js/main.js` directly, so any edits to those files take effect immediately after a refresh.
 
 ## Browser Requirements
 
