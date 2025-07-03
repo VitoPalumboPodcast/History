@@ -439,8 +439,6 @@
       const timelineItems = new vis.DataSet(events);
       const timelineOptions = {
         height: '100%',
-        min: timelineMin,
-        max: timelineMax,
         start: timelineMin,
         end: new Date(Math.max(timelineMin.getTime() + (30 * 24 * 60 * 60 * 1000), timelineMax.getTime())), // Ensure at least a 30-day window or full range
         zoomMin: 1000 * 60 * 60 * 24 * 7, // Minimum zoom level: 1 week
