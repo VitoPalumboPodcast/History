@@ -46,6 +46,21 @@ properties such as `popup` text or a Leaflet `style` object control how the
 object is displayed. `updateObjects()` shows or hides these layers based on the
 visible timeline range.
 
+To draw arrows along a polyline, include `showArrows: true` in the object. This
+creates a `Leaflet.PolylineDecorator` with arrowheads following the line's
+direction. Example:
+
+```javascript
+{
+  start: '2024-04-01',
+  end: '2024-04-30',
+  type: 'polyline',
+  coordinates: [[52, 12], [48, 12]],
+  showArrows: true,
+  style: { color: '#00ffff', weight: 2 }
+}
+```
+
 ## Modifying Events, Empires and Objects
 
 * **Events** are listed in `js/data.js` as an array named `events`. Each entry

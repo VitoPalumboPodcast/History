@@ -19,6 +19,19 @@ const objects = [
     popup: 'Trade Route (Feb 10-25)'
   },
   {
+    start: '2024-04-01',
+    end: '2024-04-30',
+    type: 'polyline',
+    coordinates: [
+      [52, 12],
+      [50, 12],
+      [48, 12]
+    ],
+    style: { color: '#00ffff', weight: 2 },
+    popup: 'Migration Path (Apr 1-30)',
+    showArrows: true
+  },
+  {
     start: '2024-03-10',
     end: '2024-03-20',
     type: 'polygon',
