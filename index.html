@@ -416,7 +416,6 @@
       const eventMarkers = {};
       for (const evt of events) {
         const marker = L.marker(evt.latlng)
-          .addTo(map)
           .bindPopup(evt.popup);
         marker.bindTooltip(evt.content, {
           permanent: true,
@@ -619,6 +618,20 @@
             if (decorator && map.hasLayer(decorator)) {
               map.removeLayer(decorator);
             }
+          }
+        }
+
+        // Update Events
+        for (const evt of events) {
+          const marker = eventMarkers[evt.id];
+          const evtStart = parseDate(evt.start);
+          const evtEnd = parseDate(evt.end);
+          if (evtStart <= viewEnd && evtEnd >= viewStart) {
+            if (!map.hasLayer(marker)) {
+              marker.addTo(map);
+            }
+          } else if (map.hasLayer(marker)) {
+            map.removeLayer(marker);
           }
         }
       }
