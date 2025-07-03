@@ -441,8 +441,10 @@
         height: '100%',
         start: timelineMin,
         end: new Date(Math.max(timelineMin.getTime() + (30 * 24 * 60 * 60 * 1000), timelineMax.getTime())), // Ensure at least a 30-day window or full range
-        zoomMin: 1000 * 60 * 60 * 24 * 7, // Minimum zoom level: 1 week
-        zoomMax: (timelineMax.getTime() - timelineMin.getTime()) * 2 // Max zoom: twice the total range
+        // Allow zooming in to one day and out to roughly the limits of the
+        // JavaScript Date range (~275k years)
+        zoomMin: 1000 * 60 * 60 * 24, // Minimum zoom level: 1 day
+        zoomMax: 8640000000000000 // Max zoom level: about 275k years
       };
       
       if (timelineOptions.end.getTime() <= timelineOptions.start.getTime()) {

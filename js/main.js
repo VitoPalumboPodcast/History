@@ -99,8 +99,10 @@ const options = {
   height: '100%',
   start: timelineMin,
   end: new Date(Math.max(timelineMin.getTime() + (30 * 24 * 60 * 60 * 1000), timelineMax.getTime())),
-  zoomMin: 1000 * 60 * 60 * 24 * 7,
-  zoomMax: (timelineMax.getTime() - timelineMin.getTime()) * 2
+  // Allow zooming in to one day and out to roughly the limits of the
+  // JavaScript Date range (~275k years)
+  zoomMin: 1000 * 60 * 60 * 24,
+  zoomMax: 8640000000000000
 };
 if (options.end.getTime() <= options.start.getTime()) {
   options.end = new Date(options.start.getTime() + 30 * 24 * 60 * 60 * 1000);
