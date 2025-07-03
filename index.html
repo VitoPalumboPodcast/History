@@ -161,6 +161,30 @@
         end: '2022-06-02',
         latlng: [37.98, 23.72],
         popup: 'Athens Festival (Jun 1-2, 2022)'
+      },
+      {
+        id: 6,
+        content: 'Dorian origin (Northern Greece)',
+        start: '-1200-01-01',
+        end: '-1200-01-02',
+        latlng: [40.5, 22.0],
+        popup: 'Dorians located in Thessaly/Macedonia (~1200 BC)'
+      },
+      {
+        id: 7,
+        content: 'Dorians move toward Pindus',
+        start: '-1100-01-01',
+        end: '-1100-01-02',
+        latlng: [39.3, 21.0],
+        popup: 'Migration south to the Pindus range (~1100 BC)'
+      },
+      {
+        id: 8,
+        content: 'Dorians enter Peloponneso',
+        start: '-1000-01-01',
+        end: '-1000-01-02',
+        latlng: [37.5, 22.0],
+        popup: 'Arrival of Dorians in Peloponnesus (~1000 BC)'
       }
       ];
     // --- END OF data.js ---
@@ -334,6 +358,32 @@
         type: 'marker',
         latlng: [25, 25],
         popup: 'Classical Ruins (Apr 1-15, 2022)'
+      },
+      {
+        start: '-1200-01-01',
+        end: '-1000-01-01',
+        type: 'polyline',
+        coordinates: [
+          [40.5, 22.0], // Thessaly/Macedonia
+          [39.3, 21.0], // Pindus region
+          [37.5, 22.0]  // Peloponneso
+        ],
+        style: { color: '#00ffff', weight: 2 },
+        popup: 'Dorian migration path (~1200-1000 BC)'
+      },
+      {
+        start: '-1000-01-01',
+        end: '-1000-01-02',
+        type: 'marker',
+        latlng: [37.07, 22.43],
+        popup: 'Sparta settled by Dorians'
+      },
+      {
+        start: '-1000-01-01',
+        end: '-1000-01-02',
+        type: 'marker',
+        latlng: [37.94, 22.93],
+        popup: 'Corinth as a Dorian center'
       }
       ];
     // --- END OF objects.js ---
