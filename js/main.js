@@ -52,19 +52,23 @@ for (const obj of objects) {
   } else if (obj.type === 'polyline') {
     layer = L.polyline(obj.coordinates, obj.style);
     if (obj.decorated) {
-      decorator = L.polylineDecorator(layer, {
-        patterns: [
-          {
-            offset: '5%',
-            repeat: '10%',
-            symbol: L.Symbol.arrowHead({
-              pixelSize: 8,
-              polygon: false,
-              pathOptions: { stroke: true, color: layer.options.color || '#000' }
-            })
-          }
-        ]
-      });
+      if (typeof L.polylineDecorator === 'function') {
+        decorator = L.polylineDecorator(layer, {
+          patterns: [
+            {
+              offset: '5%',
+              repeat: '10%',
+              symbol: L.Symbol.arrowHead({
+                pixelSize: 8,
+                polygon: false,
+                pathOptions: { stroke: true, color: layer.options.color || '#000' }
+              })
+            }
+          ]
+        });
+      } else {
+        console.warn('Leaflet polylineDecorator plugin is not available - skipping decoration');
+      }
     }
   } else if (obj.type === 'polygon') {
     layer = L.polygon(obj.coordinates, obj.style);
