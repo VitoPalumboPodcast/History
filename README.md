@@ -71,6 +71,23 @@ The application uses [Leaflet](https://leafletjs.com/) 1.9.4 and
 browser with ES6 support such as recent versions of Chrome, Firefox or Edge is
 recommended.
 
+## Updating Vendor Libraries
+
+Local copies of Leaflet, Leaflet PolylineDecorator and vis-timeline are kept in
+the `vendor/` directory so the site works without internet access. To update to
+a newer release or replace the files, download the desired versions from the
+official projects and overwrite the corresponding files:
+
+```
+vendor/leaflet/leaflet.js
+vendor/leaflet/leaflet.css
+vendor/leaflet-polylinedecorator/leaflet.polylineDecorator.min.js
+vendor/vis-timeline/vis-timeline-graph2d.min.js
+vendor/vis-timeline/vis-timeline-graph2d.min.css
+```
+
+After replacing the files, reload the page to use the updated libraries.
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
