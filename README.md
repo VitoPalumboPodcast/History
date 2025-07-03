@@ -8,7 +8,9 @@ Visit the live map at <https://vitopalumbopodcast.github.io/History/>.
 
 ## Serving the Site Locally
 
-The project is a static website. From the repository root run:
+The page now loads Leaflet, vis-timeline and the polyline decorator from
+public CDNs, so you can open `index.html` directly in any modern browser.
+If you prefer to run a small local server, from the repository root run:
 
 ```bash
 python -m http.server
@@ -73,10 +75,10 @@ recommended.
 
 ## Updating Vendor Libraries
 
-Local copies of Leaflet, Leaflet PolylineDecorator and vis-timeline are kept in
-the `vendor/` directory so the site works without internet access. To update to
-a newer release or replace the files, download the desired versions from the
-official projects and overwrite the corresponding files:
+The `vendor/` directory contains placeholder files for Leaflet,
+Leaflet PolylineDecorator and vis-timeline. Replace them with the real library
+files if you need to work completely offline. Download the desired versions
+from the official projects and overwrite the corresponding files:
 
 ```
 vendor/leaflet/leaflet.js
