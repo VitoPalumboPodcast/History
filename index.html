@@ -412,7 +412,7 @@
       }
 
       // Add event markers and store references
-      const eventMarkers = {};
+      const markers = {};
       for (const evt of events) {
         const marker = L.marker(evt.latlng)
           .bindPopup(evt.popup);
@@ -421,7 +421,7 @@
           direction: 'top',
           className: 'event-label'
         });
-        eventMarkers[evt.id] = marker;
+        markers[evt.id] = marker;
         marker.on('click', () => {
           if (timeline) {
             timeline.setSelection(evt.id, { focus: true });
@@ -522,7 +522,7 @@
       const timelineEl = document.getElementById('timeline');
       const yearLabel = document.getElementById('year-label');
 
-      const timelineItems = new vis.DataSet(events);
+      const items = new vis.DataSet(events);
       const timelineOptions = {
         height: '100%',
         start: timelineMin,
@@ -543,7 +543,7 @@
         return;
       }
 
-      const timeline = new vis.Timeline(timelineEl, timelineItems, timelineOptions);
+      const timeline = new vis.Timeline(timelineEl, items, timelineOptions);
 
       function updateIndicator() {
         if (!timeline) return;
@@ -559,8 +559,8 @@
 
       timeline.on('select', props => {
         const id = props.items[0];
-        if (id && eventMarkers[id]) {
-          const marker = eventMarkers[id];
+        if (id && markers[id]) {
+          const marker = markers[id];
           map.setView(marker.getLatLng(), 8); // Zoom level 8 when selecting an event
           marker.openPopup();
         }
@@ -631,7 +631,7 @@
 
         // Update Events
         for (const evt of events) {
-          const marker = eventMarkers[evt.id];
+          const marker = markers[evt.id];
           const evtStart = parseDate(evt.start);
           const evtEnd = parseDate(evt.end);
           if (evtStart <= viewEnd && evtEnd >= viewStart) {
@@ -654,9 +654,9 @@
       setTimeout(() => {
         updateIndicator();
         updateMapLayers();
-        if (timelineItems.length > 0) { // If there are items, fit timeline to them
+        if (items.getIds().length > 0) { // If there are items, fit timeline to them
             timeline.fit();
-            const firstEvent = events.find(e => e.id === timelineItems.getIds()[0]);
+            const firstEvent = events.find(e => e.id === items.getIds()[0]);
             if (firstEvent && firstEvent.latlng) {
                  map.setView(firstEvent.latlng, 5); // Center map on the first event initially
             }
