@@ -534,6 +534,11 @@
         timelineOptions.end = new Date(timelineOptions.start.getTime() + 30 * 24 * 60 * 60 * 1000); // Add 30 days
       }
 
+      if (!window.vis) {
+        console.warn('Timeline library failed to load');
+        yearLabel.textContent = 'Timeline library failed to load';
+        return;
+      }
 
       const timeline = new vis.Timeline(timelineEl, timelineItems, timelineOptions);
 
