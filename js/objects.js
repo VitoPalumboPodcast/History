@@ -54,12 +54,31 @@ const objects = [
     type: 'polyline',
     coordinates: [
       [40.5, 22.0], // Thessaly/Macedonia
+      [39.8, 21.8], // gentle curve southward
       [39.3, 21.0], // Pindus region
+      [38.8, 21.5], // continue curve
       [37.5, 22.0]  // Peloponneso
     ],
-    style: { color: '#00ffff', weight: 2 },
+    style: { color: '#00ffff', weight: 4 },
     popup: 'Dorian migration path (~1200-1000 BC)',
-    decorated: true
+    decorated: true,
+    decoratorOptions: {
+      patterns: [
+        {
+          offset: '100%',
+          repeat: 0,
+          symbol: L.Symbol.arrowHead({
+            pixelSize: 15,
+            polygon: true,
+            pathOptions: {
+              stroke: true,
+              color: '#00ffff',
+              fillOpacity: 1
+            }
+          })
+        }
+      ]
+    }
   },
   {
     start: '-1000-01-01',
