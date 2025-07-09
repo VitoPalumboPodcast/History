@@ -70,7 +70,7 @@ for (const obj of objects) {
     layer = L.polyline(obj.coordinates, obj.style);
     if (obj.decorated) {
       if (typeof L.polylineDecorator === 'function') {
-        const decoOpts = obj.decoratorOptions || {
+        decorator = L.polylineDecorator(layer, {
           patterns: [
             {
               offset: '5%',
@@ -82,8 +82,7 @@ for (const obj of objects) {
               })
             }
           ]
-        };
-        decorator = L.polylineDecorator(layer, decoOpts);
+        });
       } else {
         console.warn('Leaflet polylineDecorator plugin is not available - skipping decoration');
       }
