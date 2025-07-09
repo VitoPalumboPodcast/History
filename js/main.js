@@ -76,8 +76,8 @@ for (const obj of objects) {
               offset: '5%',
               repeat: '10%',
               symbol: L.Symbol.arrowHead({
-                pixelSize: 12,
-                polygon: true,
+                pixelSize: 8,
+                polygon: false,
                 pathOptions: { stroke: true, color: layer.options.color || '#000' }
               })
             }
